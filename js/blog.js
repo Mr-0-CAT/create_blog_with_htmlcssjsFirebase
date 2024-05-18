@@ -40,6 +40,25 @@ function getPostData (){
           `
   
         }
+
+
+        <div class="card1" >
+     
+        <img class="img" src="{{ post.data.image}}" alt=""  >
+        <div class="card__content"> <a  class="eve1" href="{{ post.url }}">
+          <p class="card__title" style="background: -webkit-linear-gradient(rgb(188, 12, 241), rgb(212, 4, 4));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;"> {{ post.data.title}}  </p>
+
+          
+          <p class="card__description">{{ post.data.description}} <br><br> <b>Date:</b> {{post.data.date}}  <br> <b>veneu:</b> {{post.data.venu}} </p>
+        </a></div>
+      </div>
+    
+    
+    
+    
+    </div>
   table.innerHTML =html
   
     })

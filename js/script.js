@@ -7,9 +7,15 @@
   // https://firebase.google.com/docs/web/setup#available-libraries
 
   // Your web app's Firebase configuration
-  const firebaseConfig = {
-    
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyAAU0TCvXJKNOO_DSAF2c4GT3m_1QnoSeA",
+  authDomain: "try1-964c6.firebaseapp.com",
+  projectId: "try1-964c6",
+  storageBucket: "try1-964c6.appspot.com",
+  messagingSenderId: "38540737777",
+  appId: "1:38540737777:web:03ef650e74228eafd73d50",
+  measurementId: "G-4CDKFHEVRD"
+};
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
