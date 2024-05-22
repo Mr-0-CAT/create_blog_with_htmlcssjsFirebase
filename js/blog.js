@@ -5,8 +5,14 @@ import { getDatabase,get,ref } from "https://www.gstatic.com/firebasejs/10.6.0/f
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
- 
-};
+  apiKey: "AIzaSyClkiHJX3mR4SdQQ2jzuG-n7ZNzuYD2REE",
+  authDomain: "dbms-d5864.firebaseapp.com",
+  projectId: "dbms-d5864",
+  storageBucket: "dbms-d5864.appspot.com",
+  messagingSenderId: "478043315963",
+  appId: "1:478043315963:web:02a9cd2c70c4755bce5a5e",
+  measurementId: "G-W7EKCZXJ0J"
+}; 
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -42,23 +48,8 @@ function getPostData (){
         }
 
 
-        <div class="card1" >
-     
-        <img class="img" src="{{ post.data.image}}" alt=""  >
-        <div class="card__content"> <a  class="eve1" href="{{ post.url }}">
-          <p class="card__title" style="background: -webkit-linear-gradient(rgb(188, 12, 241), rgb(212, 4, 4));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;"> {{ post.data.title}}  </p>
-
-          
-          <p class="card__description">{{ post.data.description}} <br><br> <b>Date:</b> {{post.data.date}}  <br> <b>veneu:</b> {{post.data.venu}} </p>
-        </a></div>
-      </div>
     
-    
-    
-    
-    </div>
+   
   table.innerHTML =html
   
     })

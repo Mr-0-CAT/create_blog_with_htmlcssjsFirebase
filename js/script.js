@@ -1,170 +1,227 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+import { getDatabase, set, ref, get, remove, update } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject  } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-storage.js";
 
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-  import { getAuth,signInWithEmailAndPassword,onAuthStateChanged, signOut  } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
-  import { getDatabase,set,ref,get,remove,update } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAAU0TCvXJKNOO_DSAF2c4GT3m_1QnoSeA",
-  authDomain: "try1-964c6.firebaseapp.com",
-  projectId: "try1-964c6",
-  storageBucket: "try1-964c6.appspot.com",
-  messagingSenderId: "38540737777",
-  appId: "1:38540737777:web:03ef650e74228eafd73d50",
-  measurementId: "G-4CDKFHEVRD"
+  apiKey: "AIzaSyClkiHJX3mR4SdQQ2jzuG-n7ZNzuYD2REE",
+  authDomain: "dbms-d5864.firebaseapp.com",
+  projectId: "dbms-d5864",
+  storageBucket: "dbms-d5864.appspot.com",
+  messagingSenderId: "478043315963",
+  appId: "1:478043315963:web:02a9cd2c70c4755bce5a5e",
+  measurementId: "G-W7EKCZXJ0J"
 };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const storage = getStorage(app);
 
-  const auth = getAuth(app)
-  const db = getDatabase(app)
+const my_blog = document.querySelector('.my_blog');
+const login_page = document.querySelector('.login');
+const notify = document.querySelector('.notify');
+const add_post_btn = document.querySelector('#post_btn');
+const update_btn = document.querySelector('.update_btn');
 
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    my_blog.classList.add('show');
+    login_page.classList.add('hide');
+  } else {
+    my_blog.classList.remove('show');
+    login_page.classList.remove('hide');
+  }
+});
 
-  const my_blog = document.querySelector('.my_blog')
-  const login_page = document.querySelector('.login')
+function SignInUser() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  signInWithEmailAndPassword(auth, email, password).then((userCredentials) => {
+    console.log(userCredentials.user.uid);
+  }).catch((error) => {
+    console.error("Sign in error: ", error);
+  });
+}
 
+const sign_btn = document.querySelector('#sign_in');
+sign_btn.addEventListener('click', SignInUser);
 
-  onAuthStateChanged(auth,(user)=>{
-     if(user){
-        my_blog.classList.add('show')
-        login_page.classList.add('hide')
-     }else{
-        my_blog.classList.remove('show')
-        login_page.classList.remove('hide')
-     }
-  })
-  
+const sign_out_btn = document.querySelector('#logout');
+sign_out_btn.addEventListener('click', () => {
+  signOut(auth).then(() => {
+    notify.innerHTML = "Signed out successfully";
+    setTimeout(() => {
+      location.reload();
+    }, 2000);
+  }).catch((error) => {
+    console.log("Sign out error: ", error);
+  });
+});
 
-  function SignInUSer() {
-   
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    signInWithEmailAndPassword (auth,email,password).then((userCredinals)=>{
-         console.log(userCredinals.user.uid);
-    })
+function Add_Post() {
+  const title = document.querySelector('#title').value;
+  const post_content = document.querySelector('#post_content').value;
+  const post2_content = document.querySelector('#post2_content').value;
+  const post_image = document.querySelector('#post_image').files[0];
+
+  if (!post_image) {
+    alert("Please select an image");
+    return;
   }
 
-  const Sign_btn = document.querySelector('#sign_in')
-  Sign_btn.addEventListener('click',SignInUSer)
+  const id = Math.floor(Math.random() * 100);
+  const imageRef = storageRef(storage, `images/${id}-${post_image.name}`);
 
-//   sign Out Logout 
-
- const sign_out_btn = document.querySelector('#logout')
- sign_out_btn.addEventListener('click',()=>{
-    signOut(auth).then(()=>{
-        //  
-    }).catch((error)=>{
-        console.log("error" + error);
-    })
- })
-
-//  ------------
-// Blog section code 
-
- const notify = document.querySelector('.notifiy')
-
-const add_post_Btn  = document.querySelector('#post_btn')
-
-function Add_Post(){
-     const title = document.querySelector('#title').value;
-     const post_content = document.querySelector('#post_content').value;
-      const id = Math.floor(Math.random()*100)
-
-      set(ref(db,'post/' + id),{
-          title:title,
-          post_content:post_content
-      })
-      notify.innerHTML = "data Added"
-      document.querySelector('#title').value="";
-     document.querySelector('#post_content').value="";
-
-     GetPostData()
+  uploadBytes(imageRef, post_image).then((snapshot) => {
+    return getDownloadURL(snapshot.ref);
+  }).then((downloadURL) => {
+    return set(ref(db, 'post/' + id), {
+      title: title,
+      post_content: post_content,
+      post2_content: post2_content,
+      imageURL: downloadURL // Save the image URL in the database
+    });
+  }).then(() => {
+    notify.innerHTML = "Data Added";
+    clearFields();
+    GetPostData();
+  }).catch((error) => {
+    console.error("Error uploading file: ", error);
+    notify.innerHTML = "Error adding data";
+  });
 }
 
+add_post_btn.addEventListener('click', Add_Post);
 
-add_post_Btn.addEventListener('click',Add_Post)
+function clearFields() {
+  document.querySelector('#title').value = "";
+  document.querySelector('#post_content').value = "";
+  document.querySelector('#post2_content').value = "";
+  document.querySelector('#post_image').value = "";
+}
 
-// Get Data from firebase Db
+function GetPostData() {
+  const user_ref = ref(db, 'post/');
+  get(user_ref).then((snapshot) => {
+    const data = snapshot.val();
+    let html = "";
+    const table = document.querySelector('table');
+    for (const key in data) {
+      const { title, post_content, post2_content, imageURL } = data[key];
+      html += `
+        <tr>
+          <td><span class="postNumber"></span></td>
+          <td>${title}</td>
+          <td><img src="${imageURL}" alt="Post Image" style="width:100px;height:100px;"></td>
+          <td>${post_content}</td>
+          <td>${post2_content}</td>
+          <td><button class="delete" onclick="delete_data(${key})">Delete</button></td>
+          <td><button class="update" onclick="update_data(${key})">Update</button></td>
+        </tr>
+      `;
+    }
+    table.innerHTML = html;
+  });
+}
 
- function GetPostData(){
-     const user_ref = ref(db,'post/')
-      get(user_ref).then((snapshot)=>{
-         const data = snapshot.val()
-        
-          let html = "";
-          const table = document.querySelector('table')
-          for( const key in data){
-             const {title,post_content} = data[key]
+GetPostData();
 
-               html+= `
-                <tr>
-                     <td> <span class="postNumber"></span></td>
-                     <td>${title} </td>
-                     <td> <button class="delete" onclick="delete_data(${key})">Delete</button> </td>
-                     <td> <button class="update" onclick="update_data(${key})">Update</button> </td>
-                </tr>
-               `
-          }
-
-          table.innerHTML = html
-
-
-
-      })
+window.delete_data = function (key) {
+   const user_ref = ref(db, `post/${key}`);
+   
+   get(user_ref).then((snapshot) => {
+     const data = snapshot.val();
+     const imageURL = data.imageURL;
+ 
+     // Delete the post from the database
+     remove(user_ref).then(() => {
+       // Delete the image from storage
+       const imageRef = storageRef(storage, imageURL);
+       return deleteObject(imageRef);
+     }).then(() => {
+       // Notify and reload the page
+       notify.innerHTML = "Post and associated image deleted successfully";
+       setTimeout(() => {
+         location.reload();
+       }, 2000);
+     }).catch((error) => {
+       console.error("Error deleting data: ", error);
+       notify.innerHTML = "Error deleting post";
+     });
+   });
  }
+ 
 
- GetPostData()
-
-//  delete_data
-
-window.delete_data = function(key){
-  
-     remove(ref(db,`post/${key}`))
-     notify.innerHTML ="data Deleted"
-     GetPostData()
-
-}
-
-// get and update data 
-
- window.update_data = function (key) {
-     const user_ref = ref(db,`post/${key}`)
-
-      get(user_ref).then((item)=>{
-         document.querySelector('#title').value = item.val().title;
-         document.querySelector('#post_content').value = item.val().post_content;
-        })
-
-
-           const update_btn = document.querySelector('.update_btn')
-            update_btn.classList.add('show')
-             document.querySelector('.post_btn').classList.add('hide')
-//   update
-
-            function Update_Form (){
-                const title = document.querySelector('#title').value;
-                const post_content = document.querySelector('#post_content').value;
-
-                  update(ref(db ,`post/${key}`),{
-                     title:title,
-                     post_content:post_content
-                  })
-               GetPostData()
-
-                
-
-            }
-
-
-
-
-    
-
-      update_btn.addEventListener('click',Update_Form)
-
-                  
-   }
+window.update_data = function (key) {
+   const user_ref = ref(db, `post/${key}`);
+ 
+   get(user_ref).then((item) => {
+     const data = item.val();
+     document.querySelector('#title').value = data.title;
+     document.querySelector('#post_content').value = data.post_content;
+     document.querySelector('#post2_content').value = data.post2_content;
+ 
+     update_btn.style.display = 'block';  // Show the update button
+     add_post_btn.style.display = 'none'; // Hide the add post button
+ 
+     update_btn.addEventListener('click', function Update_Form() {
+       const title = document.querySelector('#title').value;
+       const post_content = document.querySelector('#post_content').value;
+       const post2_content = document.querySelector('#post2_content').value;
+       const post_image = document.querySelector('#post_image').files[0];
+       
+       if (post_image) {
+         const oldImageRef = storageRef(storage, data.imageURL);
+         
+         // Delete the old image first
+         deleteObject(oldImageRef).then(() => {
+           const newImageRef = storageRef(storage, `images/${key}-${post_image.name}`);
+ 
+           // Upload the new image
+           return uploadBytes(newImageRef, post_image).then((snapshot) => {
+             return getDownloadURL(snapshot.ref);
+           }).then((downloadURL) => {
+             // Update the post with the new image URL
+             return update(ref(db, `post/${key}`), {
+               title: title,
+               post_content: post_content,
+               post2_content: post2_content,
+               imageURL: downloadURL
+             });
+           }).then(() => {
+             notify.innerHTML = "Post updated successfully";
+             clearFields();
+             GetPostData();
+           }).catch((error) => {
+             console.error("Error uploading file: ", error);
+             notify.innerHTML = "Error updating post";
+           });
+         }).catch((error) => {
+           console.error("Error deleting old image: ", error);
+           notify.innerHTML = "Error deleting old image";
+         });
+       } else {
+         update(ref(db, `post/${key}`), {
+           title: title,
+           post_content: post_content,
+           post2_content: post2_content
+         }).then(() => {
+           notify.innerHTML = "Post updated successfully";
+           clearFields();
+           GetPostData();
+         }).catch((error) => {
+           console.error("Error updating post: ", error);
+           notify.innerHTML = "Error updating post";
+         });
+       }
+ 
+       update_btn.style.display = 'none';  // Hide the update button
+       add_post_btn.style.display = 'block'; // Show the add post button
+     }, { once: true });
+   });
+ }
+ 
